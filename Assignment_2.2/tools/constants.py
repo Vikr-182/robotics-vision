@@ -16,3 +16,4 @@ PNG_DESTINATION = "./png/"
 THRESHOLD = 0
 CAMERA_TO_LIDAR =  [[0,-1,0], [0, 0, -1], [1, 0, 0]]
 STEP = 2
+mini = 100

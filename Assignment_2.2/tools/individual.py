@@ -32,27 +32,25 @@ def get_val(val):
     VAL = math.floor(abs(val))
     return VAL
 
+def inRange(val,maxVal):
+    if val > 0 and val < maxVal:
+        return 1
+    return 0
+
 def createOccupancyGrid(matrix,ind,points,poses):
-    add, mul = 100, 2
-    cnt = 0
-    for x in points:
-        if int((x[0]+add)*mul)>XSIZ or int((x[2]+add)*mul)>XSIZ:
-            cnt+=1
-        elif int((x[0]+add)*mul)<0 or int((x[2]+add)*mul) <00:
-            cnt+=1
-        else :
-            matrix[int(x[0]+add)*mul, int(x[2]+add)*mul, :] += 1
-    for i in range(int(XSIZ/STEP)):
-        for j in range(int(YSIZ/STEP)):
-            img = matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP, 0]
-            t = np.sum(img)
-            if t > THRESHOLD:
+    xstep=int(XSIZ/STEP)
+    ystep=int(YSIZ/STEP)
+    for point in points:
+        if inRange(int((point[0] + mini)) * STEP,XSIZ) and inRange(int((point[0] + mini) * STEP),XSIZ):
+            matrix[int(point[0] + mini) * STEP, int(point[2] + mini) * STEP, :] += 1
+    for i in range(xstep):
+        for j in range(ystep):
+            if np.sum(matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP, 0]) > THRESHOLD:
                 matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 200
             else :
                 matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 0
 
     cv2.imwrite(PNG_DESTINATION + convertToString(ind) +'.png', matrix)
-
     return matrix
 
 def reduceMatrix(matrix):

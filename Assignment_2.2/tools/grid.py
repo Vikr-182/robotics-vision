@@ -33,6 +33,11 @@ def get_val(val):
     VAL = math.floor(abs(val))
     return VAL
 
+def inRange(val,maxVal):
+    if val > 0 and val < maxVal:
+        return 1
+    return 0
+
 def createTotalOccupancyGrid(start_ind,size,points,poses):
     for ind in range(start_ind,start_ind + size):
         CM = np.array(CAMERA_TO_LIDAR)
@@ -49,24 +54,15 @@ def createTotalOccupancyGrid(start_ind,size,points,poses):
         Y = np.asarray(pcd.points)
         print(Y.shape)
 
-        add, mul = 100, 2
-        cnt = 0
-        for x in Y:
-            if int((x[0]+add)*mul)>XSIZ or int((x[2]+add)*mul)>XSIZ:
-                cnt+=1
-            elif int((x[0]+add)*mul)<0 or int((x[2]+add)*mul) <00:
-                cnt+=1
-            else :
-                matrix[int(x[0]+add)*mul, int(x[2]+add)*mul, :] += 1
+        for point in Y:
+            if inRange(int((point[0] + mini)) * STEP,XSIZ) and inRange(int((point[0] + mini) * STEP),XSIZ):
+                matrix[int(point[0] + mini) * STEP, int(point[2] + mini) * STEP, :] += 1
     for i in range(int(1000/STEP)):
         for j in range(int(1000/STEP)):
-            img = matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP, 0]
-            t = np.sum(img)
-            if t > THRESHOLD:
+            if np.sum(matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP, 0]) > THRESHOLD:
                 matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 200
             else :
                 matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 0
-
 
     cv2.imwrite(PNG_DESTINATION + convertToString(start_ind)  + "_SIZE" + str(size) +'.png', matrix)
     return matrix

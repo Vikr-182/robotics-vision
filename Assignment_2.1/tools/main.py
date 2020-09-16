@@ -48,11 +48,11 @@ if __name__ == "__main__":
     mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(
             size=100, origin=(0.0, 0.0, 0))
 
-    vis = o3d.visualization.Visualizer()
+    visualization = o3d.visualization.Visualizer()
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(actual_array)
     downpcd = pcd.voxel_down_sample(voxel_size=1)
-    vis.create_window()
-    vis.add_geometry(downpcd)
-    vis.add_geometry(mesh_frame) 
-    vis.run()   
+    visualization.create_window()
+    visualization.add_geometry(downpcd)
+    visualization.add_geometry(mesh_frame) 
+    visualization.run()   
