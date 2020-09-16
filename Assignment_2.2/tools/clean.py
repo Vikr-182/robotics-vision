@@ -52,10 +52,19 @@ def read_poses():
 
 def transform_matrix(points,poses):
     CL = np.array(CAMERA_TO_LIDAR)
-    poses = poses.reshape(3,4)
+    poses = [
+                [poses[0],poses[1],poses[2],poses[3]],
+                [poses[4],poses[4],poses[6],poses[7]],
+                [poses[8],poses[9],poses[10],poses[11]],
+                [0,0,0,1]
+            ]
     Y = np.array(points)
+    print(Y.shape)
+    print("AA")
     Y = np.dot(CL,Y.T).T
     Y = np.dot(poses,Y.T).T
+    print(Y.shape)
+    print("BB")
     return Y
 
 
