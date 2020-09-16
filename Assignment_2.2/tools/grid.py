@@ -25,11 +25,12 @@ def read_poses():
 if __name__ == "__main__":
     points = read_points()
     poses = read_poses()
+    print(len(points))
+    print(len(poses))
     actual_array = []
     for i in range(NUM_FILES):
         A = np.array(points[i])
-        CL = np.array(camera_to_lidar)
-        A = np.dot(CL,A.T).T
+        print(A.shape)
         B = np.array(
             [
             [poses[i][0],poses[i][1],poses[i][2],poses[i][3]],
@@ -37,14 +38,12 @@ if __name__ == "__main__":
             [poses[i][8],poses[i][9],poses[i][10],poses[i][11]]
             ]
             )
+        #print(B.shape)
+        #print("BAZINGA")
         C = np.dot(B,A.transpose()).transpose()
-        if i != 0:
-            actual_array = np.concatenate((actual_array,C))
-        else:
-            actual_array = C
-        
+        #print(C.shape)
+        #print(len(C))
+        actual_array.append(C.tolist())
+    print(len(actual_array))
+    o3d.visualization.draw_geometries([np.array(actual_array)])
 
-    actual_array = np.array(actual_array)
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(actual_array)
-    o3d.visualization.draw_geometries([pcd])
