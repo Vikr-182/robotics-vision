@@ -16,7 +16,7 @@ def convertToString(num):
 def read_points():
     array = [[] for i in range(0,NUM_FILES)]
     for i in range(0,NUM_FILES):
-       array[i] = readPointCloud(PATH_DATASET + "mydata/" + convertToString(i) + ".bin")
+        array[i] = readPointCloud(PATH_DATASET + "dataset/01/" + convertToString(i) + ".bin")
     return array
 
 def read_poses():
@@ -33,19 +33,41 @@ def get_val(val):
     return VAL
 
 def createOccupancyGrid(matrix,ind,points,poses):
-    Y = np.array(points)
-    CL = np.array(CAMERA_TO_LIDAR)
-    Y = np.dot(CL,Y.T).T
+    CM = np.array(CAMERA_TO_LIDAR)
+    Y = points[:, :3]
+    Y = np.dot(CM[:, :3], Y.T).T
+    vis = o3d.visualization.Visualizer()
+    pcd = o3d.geometry.PointCloud()
+    poses =  poses.reshape(3, 4)
+    Y = np.dot(poses[:, :3], Y.T).T
+    Y = Y + poses[:, 3]
+    pcd.points = o3d.utility.Vector3dVector(Y)
+    pcd = pcd.voxel_down_sample(voxel_size=3)
+    Y = np.asarray(pcd.points)
     print(Y.shape)
-    Y = np.dot(poses.reshape(3,4),Y.T).T
-    for i in range(len(points)):
-        Y = points[i]
-        if get_val(Y[0] + MAX[0]) < MAX[0] and get_val(Y[0] + MAX[0]) > MIN[0]:
-            if get_val(Y[1] + MAX[1]) < MAX[1] and get_val(Y[1] + MAX[1]) > MIN[1]:
-                if get_val(Y[2] + MAX[2]) < MAX[2] and get_val(Y[2] + MAX[2]) > MIN[0]:
-                    matrix[get_val(Y[0] + MAX[0])][get_val(Y[1] + MAX[1])][get_val(Y[2] + MAX[2])] = matrix[get_val(Y[0] + MAX[0])][get_val(Y[1] + MAX[1])][get_val(Y[2] + MAX[2])] + 1
+
+    add, mul = 100, 2
+    cnt = 0
+    for x in Y:
+        if int((x[0]+add)*mul)>XSIZ or int((x[2]+add)*mul)>XSIZ:
+            cnt+=1
+        elif int((x[0]+add)*mul)<0 or int((x[2]+add)*mul) <00:
+            cnt+=1
+        else :
+            matrix[int(x[0]+add)*mul, int(x[2]+add)*mul, :] += 1
+    for i in range(int(600/STEP)):
+        for j in range(int(600/STEP)):
+            img = matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP, 0]
+            t = np.sum(img)
+            if t > THRESHOLD:
+                matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 200
+            else :
+                matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 0
+
+
+    cv2.imwrite(PNG_DESTINATION + convertToString(ind) +'.png', matrix)
+
     return matrix
-        #print(Y[i].shape)
 
 def reduceMatrix(matrix):
     for i in range(XSIZ):
@@ -55,10 +77,8 @@ def reduceMatrix(matrix):
     return matrix
 
 if __name__ == "__main__":
-    matrix = np.zeros(shape=(XSIZ,YSIZ,ZSIZ));
-    points = read_points()
-    poses = read_poses()
-    for ind in range(1):
+    points = read_points() # Gets a N x 3 array 
+    poses = read_poses() # Gets all poses
+    for ind in range(NUM_FILES):
+        matrix = np.zeros(shape=(XSIZ, YSIZ, ZSIZ))
         matrix = createOccupancyGrid(matrix,ind,points[ind],poses[ind])
-        matrix = reduceMatrix(matrix);
-        save_png(matrix,ind)

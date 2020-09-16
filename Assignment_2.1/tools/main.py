@@ -28,7 +28,7 @@ if __name__ == "__main__":
     actual_array = []
     for i in range(NUM_FILES):
         A = np.array(points[i])
-        CL = np.array(camera_to_lidar)
+        CL = np.array(CAMERA_TO_LIDAR)
         A = np.dot(CL,A.T).T
         B = np.array(
             [

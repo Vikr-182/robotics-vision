@@ -32,8 +32,6 @@ def filter(array):
             if key == 0:
                 carray.append(array[i][j])
         barray.append(carray)
-        print("AFTER")
-        print(len(carray))
         fil = open(PATH_MY_DATASET + "mydata/" + convertToString(i) + ".bin","wb")
         carray = np.array(carray)
         np.save(fil,carray)
@@ -52,7 +50,12 @@ def read_poses():
 
 def transform_matrix(points,poses):
     CL = np.array(CAMERA_TO_LIDAR)
-    poses = poses.reshape(3,4)
+    poses = np.array([
+                [poses[0],poses[1],poses[2],poses[3]],
+                [poses[4],poses[4],poses[6],poses[7]],
+                [poses[8],poses[9],poses[10],poses[11]],
+                [0,0,0,1]
+            ])
     Y = np.array(points)
     Y = np.dot(CL,Y.T).T
     Y = np.dot(poses,Y.T).T

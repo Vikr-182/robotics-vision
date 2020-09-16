@@ -32,11 +32,8 @@ if __name__ == "__main__":
         A = np.array(points[i])
         print(A.shape)
         B = poses[i].reshape(3,4)#np.array(
-        #print(B.shape)
-        #print("BAZINGA")
         C = np.dot(B,A.transpose()).transpose()
         print(C.shape)
-        #print(len(C.tolist()))
         print("RARARAR")
         if i != 0:
             actual_array = np.concatenate((actual_array,C))

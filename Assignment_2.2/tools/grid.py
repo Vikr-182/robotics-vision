@@ -1,7 +1,9 @@
-from utils import *
-from constants import *
+########################## LIBRARY IMPORTS ################################
 from imports import * 
-
+########################## CUSTOM IMPORTS #################################
+from constants import *
+from utils import *
+from individual import createOccupancyGrid
 
 def convertToString(num):
     a = str(num % 10)
@@ -15,35 +17,79 @@ def convertToString(num):
 def read_points():
     array = [[] for i in range(0,NUM_FILES)]
     for i in range(0,NUM_FILES):
-       array[i] = readPointCloud(PATH_DATASET + "mydata/" + convertToString(i) + ".bin")
+        array[i] = readPointCloud(PATH_DATASET + "dataset/01/" + convertToString(i) + ".bin")[:,:3]
     return array
 
 def read_poses():
     array = readData(PATH_DATASET + "dataset/01.txt")
     return array
 
-if __name__ == "__main__":
-    points = read_points()
-    poses = read_poses()
-    print(len(points))
-    print(len(poses))
-    actual_array = []
-    for i in range(NUM_FILES):
-        A = np.array(points[i])
-        print(A.shape)
-        B = np.array(
-            [
-            [poses[i][0],poses[i][1],poses[i][2],poses[i][3]],
-            [poses[i][4],poses[i][5],poses[i][6],poses[i][7]],
-            [poses[i][8],poses[i][9],poses[i][10],poses[i][11]]
-            ]
-            )
-        #print(B.shape)
-        #print("BAZINGA")
-        C = np.dot(B,A.transpose()).transpose()
-        #print(C.shape)
-        #print(len(C))
-        actual_array.append(C.tolist())
-    print(len(actual_array))
-    o3d.visualization.draw_geometries([np.array(actual_array)])
 
+def save_png(matrix,ind):
+    cv2.imwrite(PNG_DESTINATION + convertToString(ind) + ".png",matrix)
+    return True
+
+def get_val(val):
+    VAL = math.floor(abs(val))
+    return VAL
+
+def createTotalOccupancyGrid(start_ind,size,points,poses):
+    for ind in range(start_ind,start_ind + size):
+        CM = np.array(CAMERA_TO_LIDAR)
+        Y = points[ind][:, :3]
+        Y = np.dot(CM[:, :3], Y.T).T
+        vis = o3d.visualization.Visualizer()
+        pcd = o3d.geometry.PointCloud()
+        poses = readData(PATH_DATASET + "dataset/01.txt")
+        poses =  poses[ind].reshape(3, 4)
+        Y = np.dot(poses[:, :3], Y.T).T
+        Y = Y + poses[:, 3]
+        pcd.points = o3d.utility.Vector3dVector(Y)
+        pcd = pcd.voxel_down_sample(voxel_size=3)
+        Y = np.asarray(pcd.points)
+        print(Y.shape)
+
+        add, mul = 100, 2
+        cnt = 0
+        for x in Y:
+            if int((x[0]+add)*mul)>XSIZ or int((x[2]+add)*mul)>XSIZ:
+                cnt+=1
+            elif int((x[0]+add)*mul)<0 or int((x[2]+add)*mul) <00:
+                cnt+=1
+            else :
+                matrix[int(x[0]+add)*mul, int(x[2]+add)*mul, :] += 1
+    for i in range(int(1000/STEP)):
+        for j in range(int(1000/STEP)):
+            img = matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP, 0]
+            t = np.sum(img)
+            if t > THRESHOLD:
+                matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 200
+            else :
+                matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 0
+
+
+    cv2.imwrite(PNG_DESTINATION + convertToString(start_ind)  + "_SIZE" + str(size) +'.png', matrix)
+    return matrix
+
+def reduceMatrix(matrix):
+    for i in range(XSIZ):
+        for j in range(YSIZ):
+            for k in range(ZSIZ):
+                matrix[i][j][k] = math.floor(matrix[i][j][k]/THRESHOLD)
+    return matrix
+
+if __name__ == "__main__":
+    points = read_points()                      # Gets a N x 3 array 
+    poses = read_poses()                        # Gets all poses
+    matrix = np.zeros(shape=(XSIZ,YSIZ,ZSIZ))
+    save_poses = poses
+    # FOR 5
+    createTotalOccupancyGrid(0,5,points,save_poses)
+    
+    save_poses = poses
+    # FOR 10
+    createTotalOccupancyGrid(0,10,points,poses)
+
+    save_poses = poses
+    # FOR 15
+    createTotalOccupancyGrid(0,15,points,poses)
