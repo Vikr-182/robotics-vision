@@ -34,7 +34,7 @@ def filter(array):
         barray.append(carray)
         print("AFTER")
         print(len(carray))
-        fil = open("mydata/" + convertToString(i) + ".bin","wb")
+        fil = open(PATH_MY_DATASET + "mydata/" + convertToString(i) + ".bin","wb")
         carray = np.array(carray)
         np.save(fil,carray)
         fil.close()

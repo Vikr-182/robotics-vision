@@ -41,14 +41,18 @@ if __name__ == "__main__":
         #print(B.shape)
         #print("BAZINGA")
         C = np.dot(B,A.transpose()).transpose()
-        #print(C.shape)
+        print(C.shape)
         #print(len(C.tolist()))
-        for i in range(len(C.tolist())):
-            actual_array.append(C.tolist()[i])
+        print("RARARAR")
+        if i != 0:
+            actual_array = np.concatenate((actual_array,C))
+        else:
+            actual_array = C
+        
 
     print(len(actual_array))
     actual_array = np.array(actual_array)
     print(actual_array.shape)
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(actual_array)
-    o3d.draw_geometries([pcd])
+    o3d.visualization.draw_geometries([pcd])
