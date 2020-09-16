@@ -51,7 +51,6 @@ def createOccupancyGrid(matrix,ind,points,poses):
             else :
                 matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP,:] = 0
 
-
     cv2.imwrite(PNG_DESTINATION + convertToString(ind) +'.png', matrix)
 
     return matrix
