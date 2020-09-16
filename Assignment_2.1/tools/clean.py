@@ -50,9 +50,20 @@ def read_poses():
     array = readData(PATH_DATASET + "dataset/01.txt")
     return array
 
+def transform_matrix(points,poses):
+    CL = np.array(CAMERA_TO_LIDAR)
+    poses = poses.reshape(3,4)
+    Y = np.array(points)
+    Y = np.dot(CL,Y.T).T
+    Y = np.dot(poses,Y.T).T
+    return Y
+
+
 if __name__ == "__main__":
     print("LOLA")
     points = read_points()
     poses = read_poses()
+    for i in range(NUM_FILES):
+        points[i] = transform_matrix(points[i],poses[i])
     print(len(poses))
     print(filter(points))

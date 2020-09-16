@@ -14,4 +14,5 @@ YSIZ = 50
 ZSIZ=  4
 PNG_DESTINATION = "./png/"
 THRESHOLD = 1
-STEPS = 3
+CAMERA_TO_LIDAR =  [[0,-1,0,0], [0, 0, -1,0], [1, 0, 0,0],[0,0,0,1]]
+STEPS = 100

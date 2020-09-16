@@ -33,12 +33,19 @@ def get_val(val):
     return VAL
 
 def createOccupancyGrid(matrix,ind,points,poses):
+    Y = np.array(points)
+    CL = np.array(CAMERA_TO_LIDAR)
+    Y = np.dot(CL,Y.T).T
+    print(Y.shape)
+    Y = np.dot(poses.reshape(3,4),Y.T).T
     for i in range(len(points)):
-        #print(points[i][0])
-        if get_val(points[i][0] + MAX[0]) < MAX[0] and get_val(points[i][0] + MAX[0]) > MIN[0]:
-            matrix[get_val(points[i][0] + MAX[0])][get_val(points[i][1] + MAX[1])][get_val(points[i][2] + MAX[2])] = matrix[get_val(points[i][0] + MAX[0])][get_val(points[i][1] + MAX[1])][get_val(points[i][2] + MAX[2])] + 1
+        Y = points[i]
+        if get_val(Y[0] + MAX[0]) < MAX[0] and get_val(Y[0] + MAX[0]) > MIN[0]:
+            if get_val(Y[1] + MAX[1]) < MAX[1] and get_val(Y[1] + MAX[1]) > MIN[1]:
+                if get_val(Y[2] + MAX[2]) < MAX[2] and get_val(Y[2] + MAX[2]) > MIN[0]:
+                    matrix[get_val(Y[0] + MAX[0])][get_val(Y[1] + MAX[1])][get_val(Y[2] + MAX[2])] = matrix[get_val(Y[0] + MAX[0])][get_val(Y[1] + MAX[1])][get_val(Y[2] + MAX[2])] + 1
     return matrix
-        #print(points[i].shape)
+        #print(Y[i].shape)
 
 def reduceMatrix(matrix):
     for i in range(XSIZ):
