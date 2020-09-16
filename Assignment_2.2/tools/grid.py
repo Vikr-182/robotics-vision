@@ -81,6 +81,7 @@ def reduceMatrix(matrix):
 if __name__ == "__main__":
     points = read_points()                      # Gets a N x 3 array 
     poses = read_poses()                        # Gets all poses
+    
     matrix = np.zeros(shape=(XSIZ,YSIZ,ZSIZ))
     save_poses = poses
     # FOR 5

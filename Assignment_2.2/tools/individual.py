@@ -33,30 +33,17 @@ def get_val(val):
     return VAL
 
 def createOccupancyGrid(matrix,ind,points,poses):
-    CM = np.array(CAMERA_TO_LIDAR)
-    Y = points[:, :3]
-    Y = np.dot(CM[:, :3], Y.T).T
-    vis = o3d.visualization.Visualizer()
-    pcd = o3d.geometry.PointCloud()
-    poses =  poses.reshape(3, 4)
-    Y = np.dot(poses[:, :3], Y.T).T
-    Y = Y + poses[:, 3]
-    pcd.points = o3d.utility.Vector3dVector(Y)
-    pcd = pcd.voxel_down_sample(voxel_size=3)
-    Y = np.asarray(pcd.points)
-    print(Y.shape)
-
     add, mul = 100, 2
     cnt = 0
-    for x in Y:
+    for x in points:
         if int((x[0]+add)*mul)>XSIZ or int((x[2]+add)*mul)>XSIZ:
             cnt+=1
         elif int((x[0]+add)*mul)<0 or int((x[2]+add)*mul) <00:
             cnt+=1
         else :
             matrix[int(x[0]+add)*mul, int(x[2]+add)*mul, :] += 1
-    for i in range(int(600/STEP)):
-        for j in range(int(600/STEP)):
+    for i in range(int(XSIZ/STEP)):
+        for j in range(int(YSIZ/STEP)):
             img = matrix[i*STEP: (i+1)*STEP, j*STEP:(j+1)*STEP, 0]
             t = np.sum(img)
             if t > THRESHOLD:
@@ -76,9 +63,24 @@ def reduceMatrix(matrix):
                 matrix[i][j][k] = math.floor(matrix[i][j][k]/THRESHOLD)
     return matrix
 
+def transform_matrix(ind,points,poses):
+    CM = np.array(CAMERA_TO_LIDAR)
+    Y = points[:, :3]
+    Y = np.dot(CM[:, :3], Y.T).T
+    vis = o3d.visualization.Visualizer()
+    pcd = o3d.geometry.PointCloud()
+    poses =  poses.reshape(3, 4)
+    Y = np.dot(poses[:, :3], Y.T).T
+    Y = Y + poses[:, 3]
+    pcd.points = o3d.utility.Vector3dVector(Y)
+    pcd = pcd.voxel_down_sample(voxel_size=3)
+    Y = np.asarray(pcd.points)
+    return Y
+
 if __name__ == "__main__":
     points = read_points() # Gets a N x 3 array 
     poses = read_poses() # Gets all poses
     for ind in range(NUM_FILES):
+        transformed = transform_matrix(ind,points[ind],poses[ind]);
         matrix = np.zeros(shape=(XSIZ, YSIZ, ZSIZ))
-        matrix = createOccupancyGrid(matrix,ind,points[ind],poses[ind])
+        matrix = createOccupancyGrid(matrix,ind,transformed,poses[ind])
